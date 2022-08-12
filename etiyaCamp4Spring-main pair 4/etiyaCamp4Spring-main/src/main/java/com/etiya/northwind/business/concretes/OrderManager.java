@@ -38,14 +38,18 @@ public class OrderManager implements OrderService {
     private ModelMapperService modelMapperService;
     private OrderDetailsService orderService;
     private final CartService cartService;
+    private final CartRepository cartRepository;
+    private final CartItemsRepository cartItemsRepository;
     private final CartItemService cartItemService;
 
     @Autowired
-    public OrderManager(OrderRepository orderRepository, ModelMapperService modelMapperService, ProductRepository productRepository, OrderDetailsService orderService, EmployeeRepository employeeRepository, CustomerRepository customerRepository, CartService cartService, CartItemService cartItemService) {
+    public OrderManager(OrderRepository orderRepository, ModelMapperService modelMapperService, ProductRepository productRepository, OrderDetailsService orderService, EmployeeRepository employeeRepository, CustomerRepository customerRepository, CartService cartService, CartRepository cartRepository, CartItemsRepository cartItemsRepository, CartItemService cartItemService) {
         this.orderRepository = orderRepository;
         this.modelMapperService = modelMapperService;
         this.orderService = orderService;
         this.cartService = cartService;
+        this.cartRepository = cartRepository;
+        this.cartItemsRepository = cartItemsRepository;
         this.cartItemService = cartItemService;
     }
 
@@ -62,12 +66,13 @@ public class OrderManager implements OrderService {
     public Result add(CreateOrderRequest createOrderRequest) {
 
         Order order = this.modelMapperService.forRequest().map(createOrderRequest, Order.class);
-        //order.setOrderDetails(new ArrayList<>());
-        List<Cart> cart = cartService.getCart(createOrderRequest.getCustomerId());
+        Cart cart = cartService.getCart(createOrderRequest.getCustomerId());
         orderRepository.save(order);
+        List<CartItem> cartItems = cart.getCartItems();
+        List<CartItem> cartItemCopy = new ArrayList<>(cartItems);
 
-        for (int i = 0; i < cart.getCartItems().size(); i++) {
-            CartItem cartItem = cart.getCartItems().get(i);
+        for (int i = 0; i < cartItems.size(); i++) {
+            CartItem cartItem = cartItems.get(i);
             OrderDetails orderDetails = new OrderDetails(
                     order.getOrderId(),
                     order,
@@ -77,10 +82,12 @@ public class OrderManager implements OrderService {
                     cartItem.getQuantity(),
                     0.0);
             orderService.save(orderDetails);
-            /*order.getOrderDetails().add(orderDetails);*/
         }
-        cartItemService.deleteCartItemsByCartId(cart.getCartId());
+        //cartItemService.deleteCartItemsByCartId(cart.getCartId());
+        //cartItems.clear();
 
+        //cartItemsRepository.findAll().forEach(cartItem -> cartItemService.deleteById(cartItem.getCartItemId()));
+        cartItemCopy.forEach(cartItem -> cartItemService.deleteById(cartItem.getCartItemId()));
         //cartService.delete(new DeleteCartRequest(cart.getCartId()));
 
         return new SuccessResult();

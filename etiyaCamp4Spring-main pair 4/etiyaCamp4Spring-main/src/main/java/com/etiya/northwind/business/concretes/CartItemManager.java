@@ -30,8 +30,20 @@ public class CartItemManager implements CartItemService {
     }
 
     @Override
-    public void deleteCartItemsByCartId(int cartId){
-        cartItemsRepository.deleteAll(cartItemsRepository.getCartItemByCartId(cartId));
+    public void deleteCartItemsByCartId(int cartId) {
+        List<CartItem> cartItems = cartItemsRepository.getCartItemByCartId(cartId);
+
+        for (int i = 0; i < cartItems.size(); i++) {
+            cartItemsRepository.deleteById(cartItems.get(i).getCartItemId());
+            System.out.println(cartItems.get(i).getQuantity());
+        }
+
+
+    }
+
+    @Override
+    public void deleteById(int cartItemId) {
+        cartItemsRepository.deleteById(cartItemId);
     }
 
     @Override
@@ -45,7 +57,9 @@ public class CartItemManager implements CartItemService {
 
     @Override
     public Result update(int cartItemId, UpdateCartItemRequest updateCartItemRequest) {
-        CartItem cartItem = this.cartItemsRepository.findById(cartItemId).orElseThrow(()-> {throw new BusinessException("Güncellenecek ürün sepette bulunamadı.");});
+        CartItem cartItem = this.cartItemsRepository.findById(cartItemId).orElseThrow(() -> {
+            throw new BusinessException("Güncellenecek ürün sepette bulunamadı.");
+        });
         cartItem.setQuantity(updateCartItemRequest.getQuantity());
         cartItemsRepository.save(cartItem);
         return new SuccessResult("Sepetteki ürün güncellendi.");
@@ -61,7 +75,7 @@ public class CartItemManager implements CartItemService {
     public DataResult<List<CartItemListResponse>> getAll() {
         List<CartItem> cartItems = this.cartItemsRepository.findAll();
         List<CartItemListResponse> response = cartItems.stream().map(cartItem -> this.modelMapperService.forResponse().map(cartItem, CartItemListResponse.class)).collect(Collectors.toList());
-        for(int i = 0; i < cartItems.size(); i++){
+        for (int i = 0; i < cartItems.size(); i++) {
             response.get(i).setCartId(cartItems.get(i).getCart().getCartId());
         }
         return new SuccessDataResult<>(response);
@@ -69,7 +83,7 @@ public class CartItemManager implements CartItemService {
 
     @Override
     public DataResult<CartItemListResponse> getById(int cartItemId) {
-        CartItem cartItem = this.cartItemsRepository.findById(cartItemId).orElseThrow(()-> new BusinessException("Verilen id ile sepet ürünü bulunamadı"));
+        CartItem cartItem = this.cartItemsRepository.findById(cartItemId).orElseThrow(() -> new BusinessException("Verilen id ile sepet ürünü bulunamadı"));
         CartItemListResponse response = this.modelMapperService.forResponse().map(cartItem, CartItemListResponse.class);
         return new SuccessDataResult<>(response);
     }

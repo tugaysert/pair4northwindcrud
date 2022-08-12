@@ -13,7 +13,7 @@ public interface CartService {
     Result add(CreateCartRequest createCartRequest);
     Result delete(DeleteCartRequest deleteCartRequest);
 
-    List<Cart> getCart(String customerId);
+    Cart getCart(String customerId);
 
     DataResult<CartListResponse> getById(int cartId);
 

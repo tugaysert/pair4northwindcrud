@@ -34,7 +34,7 @@ public class CartManager implements CartService {
         this.customerService = customerService;
     }
     @Override
-    public List<Cart> getCart(String customerId){
+    public Cart getCart(String customerId){
         return cartRepository.getByCustomerId(customerId);
     }
     @Override

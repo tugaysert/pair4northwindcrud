@@ -10,6 +10,6 @@ import java.util.List;
 public interface CartRepository extends JpaRepository<Cart, Integer> {
 
     @Query("select c from Cart c where c.customer.customerId =:customerId ")
-    public List<Cart> getByCustomerId(@Param("customerId") String customerId);
+    public Cart getByCustomerId(@Param("customerId") String customerId);
 
 }

@@ -13,6 +13,7 @@ import java.util.List;
 public interface CartItemService {
 
     void deleteCartItemsByCartId(int cartId);
+    void deleteById(int cartItemId);
 
     Result add(CreateCartItemRequest createCartItemRequest);
 
